@@ -1,14 +1,40 @@
-<template>
+<!-- <template>
 <div>
   <form class="login" @submit.prevent="auth">
     <h1>Sign in</h1>
     <label>Login</label>
-    <input required v-model="login" type="text" placeholder="Name" />
+    <input required v-model="username" type="text" placeholder="Name" />
     <label>Password</label>
     <input required v-model="password" type="password" placeholder="Password" />
     <hr />
     <button type="submit">Login</button>
   </form>
+</div>
+</template> -->
+
+
+<template >
+<div class="div text-center d-flex justify-content-center">
+  <div class="mt-5 w-25">
+    <b-card class="text-light" header="АВТОРИЗАЦИЯ" header-bg-variant="success" body-bg-variant="light">
+
+      <b-form-group class="text-left text-dark" label="Логин" label-for="login-input">
+        <b-form-input required id="login-input" v-model.trim="username"></b-form-input>
+      </b-form-group>
+
+      <b-form-group class="text-left text-dark" label="Пароль" label-for="password-input">
+        <b-form-input id="password-input" type="password" v-model="password"></b-form-input>
+      </b-form-group>
+
+      <b-card-footer class="mt-4 m-auto"></b-card-footer>
+      <b-alert v-model="showDismissibleAlert" variant="danger" dismissible="">
+        <div>{{message}}</div>
+      </b-alert>
+
+      <b-button class="btn-block" type="submit" @click="auth" variant="outline-success">Войти</b-button>
+    </b-card>
+
+  </div>
 </div>
 </template>
 
@@ -16,41 +42,32 @@
 export default {
   data() {
     return {
-      login: "",
+      username: "",
       password: "",
-      message: "Неверные данные",
-      showDismissibleAlert: false
-
-    }
-  },
-  computed: {
-    userPassword: {
-      get() {
-        return this.User.password;
-      },
-      set(value) {
-        this.showDismissibleAlert = false;
-        this.User.password = value;
-      }
-    },
-    userLogin: {
-      get() {
-        return this.User.login;
-      },
-      set(value) {
-        this.showDismissibleAlert = false;
-        this.User.login = value;
-      }
+      token: null,
+      showDismissibleAlert: false,
+      message: 'Данные не верны'
     }
   },
   methods: {
-    auth: function () {
-        let login = this.login
-        let password = this.password
-        this.$store.dispatch('auth', { login, password })
-       .then(() => this.$router.push('/'))
-       .catch(err => console.log(err))
-      }
+    async auth() {
+      await this.$store.dispatch('auth', {
+          username: this.username,
+          password: this.password
+        })
+        .then (response => {
+          this.token =  response.data.token
+          if (this.token) {
+            this.$router.push({
+              name: 'Home'
+            })
+          }
+        })
+        .catch(err => console.log(err),
+          console.log("Ошибка авторизации"),
+          this.showDismissibleAlert = true
+        )
+    }
   }
 }
 </script>
